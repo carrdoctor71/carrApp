@@ -1,0 +1,202 @@
+// libraries needed for multiscreen applications
+import 'react-native-gesture-handler'; // added
+import React, { useState } from 'react'; // added
+import { StatusBar } from 'expo-status-bar'; // default loaded from setup
+import { Pressable } from 'react-native'; // added, could add Pressable to line below
+import { StyleSheet, Text, View, ImageBackground, TextInput } from 'react-native'; // default loaded from setup
+import { NavigationContainer } from '@react-navigation/native'; // added
+import { createStackNavigator } from '@react-navigation/stack'; // added
+import MapView, {Marker} from 'react-native-maps'; // added for maps funtionaility
+import { Audio } from 'expo-av';
+
+var carName = " ";
+function ValidateInput(textToDisplay)  {
+  alert('Your car is now named ' + carName + '!')
+}
+
+const CustomMarker = () => (
+  <View style={{
+    paddingVertical:10, 
+    paddingHorizontal:30, 
+    backgroundColor: '#007bff',
+    borderColor: '#eee',
+    borderRadius:5,
+    elevation:10
+    }}>
+    <Text style={{color:'#fff'}}>{carName}</Text>
+  </View>
+);
+
+// Mission action screen
+function MainScreen({navigation}){
+  return(
+    <View style={{flex:1, background:'black'}}>
+      <View style={{flex:1, background:'orange'}}>
+        <Text style={{fontSize:20}}>
+          {'\n\n'} Select Type of Car You Are Searching
+        </Text>
+      </View>
+
+      <View style={{flex:1, background:'blue'}}>
+        <TextInput style={{height:40, borderColor:'blue', borderWidth:1, color:'black', fontSize:22}}
+        placeholder="Enter Your Cars' Name"
+        onChangeText={text => carName = text}
+        onEndEditing={() => ValidateInput(carName)}
+        />
+        <Pressable onPress={() => navigation.navigate('Economy Car')}>
+          <Text style={{fontSize:18}}>
+            {'\n\n'} Economy Car
+          </Text>
+        </Pressable>
+      </View>
+
+      <View style={{flex:1, background:'green'}}>
+        <Pressable onPress={() => navigation.navigate('Sport Utility Vechicle')}>
+          <Text style={{fontSize:18}}>
+            {'\n\n'} Sport Utility Vechicle
+          </Text>
+        </Pressable>
+      </View>
+
+      <View style={{flex:1}}>
+        <Pressable onPress={() => navigation.navigate('PickUp Truck')}>
+          <Text style={{color:'black', fontSize:18}}>
+            {'\n\n'} Pickup Truck
+          </Text>
+        </Pressable>
+      </View>
+    </View>);
+}
+
+function EconomyCar({navigation}){
+const [region, setRegion] = useState({
+    latitude: 42.33168,
+    longitude: -83.048,
+    latitudeDelta: 0.005,
+    longitudeDelta: 0.005,
+  });
+  PlaySmallCar();
+  return(
+    <View style={{flex:1}}>
+      <View style={{flex:3}}>
+        <ImageBackground style={{width: '100%', height: '100%'}} source={require('./assets/prius.jpg')}>
+        <Text style={{fontSize:24, fontWeight:'bold', color:'white'}}>{carName} is ready! See Pickup Location!</Text>
+        </ImageBackground>
+      </View>
+      <MapView
+        style={{flex:1}}
+        region={region}
+        onRegionChangeComplete={(region) => setRegion(region)}>
+        <Marker coordinate={{latitude: 42.33168, longitude: -83.048}}>
+        <CustomMarker/>
+        </Marker>
+      </MapView>
+    </View>);
+}
+
+function SUV({navigation}){
+  
+  const [region, setRegion] = useState({
+    latitude: 42.33168,
+    longitude: -83.048,
+    latitudeDelta: 0.005,
+    longitudeDelta: 0.005,
+  });
+  PlayMuscleCar();
+  return(
+    <View style={{flex:1}}>
+      <View style={{flex:3}}>
+        <ImageBackground style={{width: '100%', height: '100%'}} source={require('./assets/suv.jpg')}>
+        <Text style={{fontSize:24, fontWeight:'bold', color:'black'}}>{carName} is ready! See Pickup Location!</Text>
+        </ImageBackground>
+      </View>
+      <MapView
+        style={{flex:1}}
+        region={region}
+        onRegionChangeComplete={(region) => setRegion(region)}>
+        <Marker coordinate={{latitude: 42.33168, longitude: -83.048}}>
+        <CustomMarker/>
+        </Marker>
+      </MapView>
+    </View>);
+}
+
+function Truck({navigation}){
+  PlayMuscleCar();
+  const [region, setRegion] = useState({
+    latitude: 42.33168,
+    longitude: -83.048,
+    latitudeDelta: 0.005,
+    longitudeDelta: 0.005,
+  });
+  
+  return(
+    <View style={{flex:1}}>
+      <View style={{flex:3}}>
+        <ImageBackground style={{width: '100%', height: '100%'}} source={require('./assets/venom.jpg')}>
+        <Text style={{fontSize:24, fontWeight:'bold', color:'blue'}}>{carName} is ready! See Picup Location!</Text>
+        </ImageBackground>
+      </View>
+      <MapView
+        style={{flex:1}}
+        region={region}
+        onRegionChangeComplete={(region) => setRegion(region)}>
+        <Marker coordinate={{latitude: 42.33168, longitude: -83.048}}>
+        <CustomMarker/>
+        </Marker>
+      </MapView>
+    </View>);
+}
+
+function PlayMuscleCar() {
+  (async () => {
+    try {
+      await Audio.setIsEnabledAsync(true);
+      const sound = new Audio.Sound();
+      await sound.loadAsync(require('./assets/muscle_carr.wav'));
+      //await sound.setIsLoopingAsync(true)
+      await sound.setVolumeAsync(1);
+      await sound.playAsync(true);
+      // unload from memory
+      // await sound.unloadAsync();
+    } catch (error) {
+      console.error(error);
+    }
+  })();
+}
+
+function PlaySmallCar() {
+  (async () => {
+    try {
+      await Audio.setIsEnabledAsync(true);
+      const sound = new Audio.Sound();
+      await sound.loadAsync(require('./assets/small_motor.wav'));
+      //await sound.setIsLoopingAsync(true)
+      await sound.setVolumeAsync(1);
+      await sound.playAsync(true);
+      // unload from memory
+      // await sound.unloadAsync();
+    } catch (error) {
+      console.error(error);
+    }
+  })();
+}
+
+// Creates the navigation component of the app
+const Stack=createStackNavigator(); // creates a instance of the navigator
+
+// This function will manage all navigation between screens
+function App(){
+  return(
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Car Choices">
+        <Stack.Screen name="Car Choices" component={MainScreen}/>
+        <Stack.Screen name="Economy Car" component={EconomyCar}/>
+        <Stack.Screen name="Sport Utility Vechicle" component={SUV}/>
+        <Stack.Screen name="PickUp Truck" component={Truck}/>
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+export default App;
